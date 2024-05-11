@@ -20,6 +20,7 @@
 		<build.dir>target</build.dir>
 		<jar.file>${project.name}-${project.version}.jar</jar.file>
 		<docker.source.image>eclipse-temurin:21-jre-alpine</docker.source.image>
+    	<spring-boot.repackage.skip>true</spring-boot.repackage.skip>
 	</properties>
 	<dependencies>
 		<dependency>
