@@ -28,40 +28,12 @@ export const Router = createBrowserRouter([
     element: <ProtectedRoutes />,
     children: [
       {
-        path: "/",
-        element: <Dashboard />,
-      },
-      {
-        path: "fy-reports",
-        element: <Reports />,
-      },
-      {
-        path: "accounts",
-        element: <Accounts />,
-      },
-      {
-        path: "transactions",
-        element: <Transactions />,
-      },
-      {
-        path: "rules",
-        element: <Rules />,
-      },
-      {
-        path: "import",
-        element: <Import />,
-      },
-      {
         path: "change-password",
         element: <ChangePassword />,
       },
       {
         element: <AdminRoutes />,
         children: [
-          {
-            path: "configuration",
-            element: <Configuration />,
-          },
         ],
       },
       {

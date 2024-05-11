@@ -1,12 +1,9 @@
 import { useState, useEffect } from "react";
-//import useSWR from "swr";
 import { DataGrid } from "@mui/x-data-grid";
 import { Box, Button, Stack } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
-//import { fetcher } from "../../utils/Fetcher";
 import ModalUserEditor from "./ModalUserEditor";
-//import { deleteJson } from "../../utils/RestJson";
 import securityManagement from "../../services/SecurityManagement";
 
 const columns = [

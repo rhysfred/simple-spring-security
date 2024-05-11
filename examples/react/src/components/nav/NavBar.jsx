@@ -11,24 +11,18 @@ import {
   Menu,
   MenuItem,
 } from "@mui/material";
-import AirlineSeatLegroomReducedIcon from "@mui/icons-material/AirlineSeatLegroomReduced";
 import ExpandCircleDownIcon from "@mui/icons-material/ExpandCircleDown";
-//import { useLocalStorage } from "usehooks-ts";
 import { Stack } from "@mui/material";
 import Authorisation from "../../services/Authorisation";
 import Authentication from "../../services/Authentication";
 
 const pages = [
-  { text: "Dashboard", link: "/" },
-  { text: "FY Reports", link: "/fy-reports" },
-  { text: "Accounts", link: "/accounts" },
-  { text: "Transactions", link: "/transactions" },
-  { text: "Rules", link: "/rules" },
-  { text: "Import", link: "/import" },
+  { text: "Home", link: "/" },
+  { text: "Page 1", link: "/page1" },
+  { text: "Page 2", link: "/page2" },
 ];
 
 const adminPages = [
-  { text: "Configuration", link: "/configuration" },
 ]
 
 const secadminPages = [
@@ -56,9 +50,6 @@ function NavBar() {
     <AppBar position="static" sx={{ height: "75px" }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <AirlineSeatLegroomReducedIcon
-            sx={{ display: { xs: "none", md: "flex" }, mr: 1 }}
-          />
           <Typography
             variant="h6"
             noWrap
@@ -72,7 +63,7 @@ function NavBar() {
               textDecoration: "none",
             }}
           >
-            Taxman
+            Application Name
           </Typography>
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             {pages.map((page) => (

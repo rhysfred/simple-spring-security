@@ -11,7 +11,7 @@
 	<groupId>com.cyphersys</groupId>
 	<artifactId>simple-spring-security</artifactId>
 	<version>1.0.0</version>
-	<name>taxman</name>
+	<name>simple-spring-security</name>
 	<description>Completely Opinionated Spring Security Setup for Responsive Apps</description>
 	<packaging>jar</packaging>
 	<properties>

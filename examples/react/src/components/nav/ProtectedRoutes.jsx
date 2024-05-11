@@ -3,7 +3,6 @@ import { useState } from "react";
 import authentication from "../../services/Authentication";
 
 export default function ProtectedRoutes() {
-  //const usr = authentication.subscribeUserChanges(handleUserChange);
   const [ user, setUser ] = useState(authentication.subscribeUserChanges(handleUserChange));
 
   function handleUserChange(user) {
