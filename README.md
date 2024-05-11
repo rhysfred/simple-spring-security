@@ -6,8 +6,16 @@ This maven module can be used as a 'drop-in' spring security solution to support
 On the security side, it stores users, roles and hashed passwords in a database of your choice, leverages JWT bearer tokens and also provides a javascript library for authentication, authorisation, token refreshing and security management.
 
 ## Usage
+Add this to your dependencies section in your pom.xml file:
 
-Add something like the following to your application.properties file:
+```
+		<dependency>
+        	<groupId>com.cyphersys</groupId>
+        	<artifactId>simple-spring-security</artifactId>
+        	<version>1.0.0</version>
+    	</dependency>
+```
+And then add something like the following to your application.properties file (changing the passwords as you go, then change them later as well once setup). No need to include the database if you already have one setup:
 
 ```
 # postgress
