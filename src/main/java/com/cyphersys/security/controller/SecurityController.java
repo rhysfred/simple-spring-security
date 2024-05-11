@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -65,19 +66,19 @@ public class SecurityController {
     @Autowired
     private PasswordEncoder encoder;
 
-    @Value("${taxman.security.defaults.admin.name:}")
+    @Value("${com.cyphersys.security.defaults.admin.name:}")
     private String defaultAdmin;
 
-    @Value("${taxman.security.defaults.admin.password:}")
+    @Value("${com.cyphersys.security.defaults.admin.password:}")
     private String defaultAdminPw;
 
-    @Value("${taxman.security.defaults.admin.role:}")
+    @Value("${com.cyphersys.security.defaults.admin.role:}")
     private String defaultAdminRoleName;
 
-    @Value("${taxman.security.defaults.roles:}")
+    @Value("${com.cyphersys.security.defaults.roles:}")
     private String defaultRoles;
 
-    @Value("${taxman.security.defaults.secadmin.password:}")
+    @Value("${com.cyphersys.security.defaults.secadmin.password:}")
     private String secadminPw;
 
     @PostConstruct
@@ -95,14 +96,16 @@ public class SecurityController {
                 logger.info("Security DB initialised with no roles created");
                 return;
             }
-            createAdminUser("secadmin", "secadmin", (secadminPw.trim().isEmpty() ? generatePassword() : secadminPw), true);
+            createAdminUser("secadmin", "secadmin",
+                    (secadminPw.trim().isEmpty() ? generatePassword("secadmin") : secadminPw), true);
             createAdminUser(defaultAdmin, defaultAdminRoleName, defaultAdminPw, false);
-            
+
         } else {
             logger.info("Security DB previously initialised. No action taken");
         }
     }
-    public Boolean createAdminUser(String adminName, String adminRoleName, String adminPw, Boolean secadmin ) {
+
+    public Boolean createAdminUser(String adminName, String adminRoleName, String adminPw, Boolean secadmin) {
         if (!adminRoleName.trim().isEmpty()) {
             Role adminRole = new Role(adminRoleName);
             adminRole = roleRepository.save(adminRole);
@@ -115,17 +118,25 @@ public class SecurityController {
                 userRepository.save(adminUser);
                 return true;
             } else {
-                logger.info("No {} user created", secadmin ? "secadmin" : "admin" );
+                logger.info("No {} user created", secadmin ? "secadmin" : "admin");
                 return false;
             }
         } else {
-                logger.info("Security DB initialised with no {} role created", secadmin ? "secadmin" : "admin" );
-                return false;
+            logger.info("Security DB initialised with no {} role created", secadmin ? "secadmin" : "admin");
+            return false;
         }
     }
 
-    public String generatePassword() {
-        return "abcdef";
+    public String generatePassword(String user) {
+        int len = 12;
+        String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!*$%@";
+        Random rnd = new Random();
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            sb.append(AB.charAt(rnd.nextInt(AB.length())));
+        }
+        logger.info("Generated password for " + user + " is " + sb.toString());
+        return sb.toString();
     }
 
     @PostMapping("/public/login")
@@ -231,7 +242,8 @@ public class SecurityController {
                     Role dbRole = odbRole.get();
                     user.addRole(dbRole);
                 } else {
-                    logger.error("Invalid role received when creating user: " + createUserRequest.getUsername() + ", role: " + role);
+                    logger.error("Invalid role received when creating user: " + createUserRequest.getUsername()
+                            + ", role: " + role);
                 }
             });
         }
@@ -257,11 +269,11 @@ public class SecurityController {
     public ResponseEntity<?> deleteUser(@PathVariable String username) {
         if (userRepository.existsByUsername(username)) {
             userRepository.deleteByUsername(username);
-            logger.info("User successfully deleted: " + username );
+            logger.info("User successfully deleted: " + username);
             return ResponseEntity
                     .ok("{}");
         }
-        logger.error("Request to delete user that does not exist: " + username );
+        logger.error("Request to delete user that does not exist: " + username);
         return ResponseEntity.notFound().build();
     }
 
@@ -287,11 +299,11 @@ public class SecurityController {
                 updatedUser.setPassword(encoder.encode(editUserRequest.getPassword()));
             }
             userRepository.save(updatedUser);
-            logger.info("User successfully updated: " + username );
+            logger.info("User successfully updated: " + username);
             return ResponseEntity
                     .ok(updatedUser.getUserResponse());
         }
-        logger.error("Request to update user that does not exist: " + username );
+        logger.error("Request to update user that does not exist: " + username);
         return ResponseEntity.notFound().build();
     }
 
