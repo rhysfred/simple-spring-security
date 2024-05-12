@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
-import com.cyphersys.security.UserDetails;
+import com.cyphersys.security.SimpleUserDetails;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -30,7 +30,7 @@ public class JwtUtils {
 
     public String generateJwtToken(Authentication authentication) {
 
-        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
+        SimpleUserDetails userPrincipal = (SimpleUserDetails) authentication.getPrincipal();
 
         return Jwts.builder()
                 .subject((userPrincipal.getUsername()))

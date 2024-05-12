@@ -7,11 +7,12 @@ import java.util.Objects;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import com.cyphersys.security.model.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-public class UserDetails implements org.springframework.security.core.userdetails.UserDetails {
+public class SimpleUserDetails implements UserDetails {
     private static final long serialVersionUID = 1L;
 
     private Long id;
@@ -23,19 +24,19 @@ public class UserDetails implements org.springframework.security.core.userdetail
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetails(Long id, String username, String password,
+    public SimpleUserDetails(Long id, String username, String password,
             Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.authorities = authorities;
     }
-    public static UserDetails build(User user) {
+    public static SimpleUserDetails build(User user) {
     List<GrantedAuthority> authorities = user.getRoles().stream()
         .map(role -> new SimpleGrantedAuthority(role.getName()))
         .collect(Collectors.toList());
 
-    return new UserDetails(
+    return new SimpleUserDetails(
         user.getId(), 
         user.getUsername(), 
         user.getPassword(), 
@@ -86,7 +87,7 @@ public class UserDetails implements org.springframework.security.core.userdetail
       return true;
     if (o == null || getClass() != o.getClass())
       return false;
-    UserDetails user = (UserDetails) o;
+    SimpleUserDetails user = (SimpleUserDetails) o;
     return Objects.equals(id, user.id);
   }
 

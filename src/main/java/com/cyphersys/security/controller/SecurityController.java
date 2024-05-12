@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.cyphersys.security.UserDetails;
+import com.cyphersys.security.SimpleUserDetails;
 import com.cyphersys.security.jwt.JwtUtils;
 import com.cyphersys.security.model.Role;
 import com.cyphersys.security.model.User;
@@ -148,7 +148,7 @@ public class SecurityController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        SimpleUserDetails userDetails = (SimpleUserDetails) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
@@ -164,7 +164,7 @@ public class SecurityController {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String jwt = jwtUtils.generateJwtToken(authentication);
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        SimpleUserDetails userDetails = (SimpleUserDetails) authentication.getPrincipal();
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
