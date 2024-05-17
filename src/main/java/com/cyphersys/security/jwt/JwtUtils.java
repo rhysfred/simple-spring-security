@@ -44,7 +44,7 @@ public class JwtUtils {
         if (key != null) {
             return key;
         }
-        if (jwtSecret != "") {
+        if (!jwtSecret.trim().equals("")) {
             key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
             return key;
         }
