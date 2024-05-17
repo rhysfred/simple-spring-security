@@ -46,6 +46,12 @@ import com.cyphersys.security.wire.response.UserResponse;
 import jakarta.annotation.PostConstruct;
 import jakarta.validation.Valid;
 
+/**
+ * Security Controller for Simple Spring Security
+ * Exposes apis to support authentication, authorisation
+ * token refreshing and user/role management.
+ * 
+ */
 @RestController
 @RequestMapping("/api/security")
 public class SecurityController {
@@ -105,11 +111,32 @@ public class SecurityController {
         }
     }
 
+    /**
+     * Method to create an admin user. Unless the given admin user is
+     * flagged as a secadmin, they will be added to all existing
+     * groups. If the adminPw is null or empty a random pw will be generated.
+     * 
+     * @param adminName     Name for the new admin account
+     * @param adminRoleName Role for the new admin account (will create if it
+     *                      doesn't exist)
+     * @param adminPw       Cleartext version of the new password.
+     * @param secadmin      Indicates whether this should be secadmin account (for
+     *                      administering simple sprint security)
+     * @return True if the admin user was successfully created
+     */
     public Boolean createAdminUser(String adminName, String adminRoleName, String adminPw, Boolean secadmin) {
-        if (!adminRoleName.trim().isEmpty()) {
-            Role adminRole = new Role(adminRoleName);
-            adminRole = roleRepository.save(adminRole);
-            if (!adminName.trim().isEmpty() && !adminPw.trim().isEmpty()) {
+        if (adminRoleName != null && !adminRoleName.trim().isEmpty()) {
+            Role adminRole;
+            Optional<Role> oAdminRole = roleRepository.findByName(adminRoleName);
+            if (oAdminRole.isPresent()) {
+                adminRole = oAdminRole.get();
+            } else {
+                adminRole = roleRepository.save(new Role(adminRoleName));
+            }
+            if (adminName != null && !adminName.trim().isEmpty()) {
+                if (adminPw == null || adminPw.trim().isEmpty()) {
+                    adminPw = generatePassword(adminName);
+                }
                 User adminUser = new User(adminName, encoder.encode(adminPw));
                 if (!secadmin) {
                     adminUser.setRoles(roleRepository.findAll());
@@ -118,27 +145,53 @@ public class SecurityController {
                 userRepository.save(adminUser);
                 return true;
             } else {
-                logger.info("No {} user created", secadmin ? "secadmin" : "admin");
+                logger.warn("No {} user created", secadmin ? "secadmin" : "admin");
                 return false;
             }
         } else {
-            logger.info("Security DB initialised with no {} role created", secadmin ? "secadmin" : "admin");
+            logger.warn("No {} user or role created", secadmin ? "secadmin" : "admin");
             return false;
         }
     }
 
-    public String generatePassword(String user) {
-        int len = 12;
+    private String generatePassword(String user) {
+        return generatePassword(user, 12, true);
+    }
+
+    /**
+     * Random password generator. Generates a pseudo-random password of given
+     * length. If
+     * the log flag is set it will output the username and password to the logs. The
+     * log flag
+     * would normally only be set for first-time initialisation, not when generating
+     * passwords
+     * during normal operations.
+     * 
+     * @param user The user is used only for logging purposes. It has no effect on
+     *             the generated password
+     * @return The newly generated pseudo-random password
+     */
+    public String generatePassword(String user, Integer length, Boolean log) {
         String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ!*$%@";
         Random rnd = new Random();
-        StringBuilder sb = new StringBuilder(len);
-        for (int i = 0; i < len; i++) {
+        StringBuilder sb = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
             sb.append(AB.charAt(rnd.nextInt(AB.length())));
         }
-        logger.info("Generated password for " + user + " is " + sb.toString());
+        if (log) {
+            logger.info("Generated password for " + user + " is " + sb.toString());
+        }
         return sb.toString();
     }
 
+    /**
+     * API to authenticate a user. Available at
+     * POST [protocol]://my.host.name/api/public/login
+     * 
+     * @param loginRequest
+     * @return an HTTP response indicating if the authentication was successful, and
+     *         if so the user object
+     */
     @PostMapping("/public/login")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
@@ -159,6 +212,11 @@ public class SecurityController {
                 roles));
     }
 
+    /**
+     * API to refresh a token. Available at
+     * GET [protocol]://my.host.name/api/secure/token
+     * @return HTTP Response indicating whether successful. If so, includes the new token
+     */
     @GetMapping("/secure/token")
     public ResponseEntity<?> refreshToken() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -175,6 +233,13 @@ public class SecurityController {
                 roles));
     }
 
+    /**
+     * API to change password for currently authenticated user
+     * Available at POST [protocol]://my.host.name/api/secure/changepassword
+     * @param principal Not included in payload, handled out of band by Simple Spring Security
+     * @param changePasswordRequest JSON Payload
+     * @return HTTP response
+     */
     @PostMapping("/secure/changepassword")
     public ResponseEntity<?> changePassword(Principal principal,
             @Valid @RequestBody ChangePasswordRequest changePasswordRequest) {
@@ -199,6 +264,13 @@ public class SecurityController {
         }
     }
 
+    /**
+     * API to allow secadmins to change a user's password
+     * Available at POST [protocol]://my.host.name/api/admin/changepassword
+     * @param principal Not included in payload, handled out of band by Simple Spring Security
+     * @param changePasswordRequest JSON Payload
+     * @return HTTP response
+     */
     @PostMapping("/admin/changepassword")
     public ResponseEntity<?> changePasswordPriveliged(Principal principal,
             @Valid @RequestBody PriveligedChangePasswordRequest changePasswordRequest) {
@@ -217,6 +289,12 @@ public class SecurityController {
         }
     }
 
+    /**
+     * API to create a new user. Must be a secadmin to call
+     * Available at POST [protocol]://my.host.name/api/admin/user
+     * @param createUserRequest
+     * @return HTTP Response, with new user in JSON format if successful
+     */
     @PostMapping("/admin/user")
     public ResponseEntity<?> createUser(@Valid @RequestBody UserRequest createUserRequest) {
         if (createUserRequest.getPassword() == null) {
@@ -252,6 +330,11 @@ public class SecurityController {
         return ResponseEntity.ok(user.getUserResponse());
     }
 
+    /**
+     * API to return the list of all users
+     * Available at GET [protocol]://my.host.name/api/admin/users
+     * @return List of users in JSON
+     */
     @GetMapping("/admin/users")
     public ResponseEntity<?> getUsers() {
         List<User> users = userRepository.findAll();
@@ -264,6 +347,12 @@ public class SecurityController {
                 .ok(userResults);
     }
 
+    /**
+     * API to delete a user
+     * Available at DELETE [protocol]://my.host.name/api/admin/user/{username}
+     * @param username The username to delete
+     * @return HTTP response
+     */
     @DeleteMapping("/admin/user/{username}")
     @Transactional
     public ResponseEntity<?> deleteUser(@PathVariable String username) {
@@ -277,6 +366,13 @@ public class SecurityController {
         return ResponseEntity.notFound().build();
     }
 
+    /**
+     * API to update a user
+     * Available at PUT [protocol]://my.host.name/api/admin/user/{username}
+     * @param username The username to update
+     * @param editUserRequest An user request
+     * @return HTTP response
+     */
     @PutMapping("/admin/user/{username}")
     public ResponseEntity<?> updateUser(@PathVariable String username,
             @Valid @RequestBody UserRequest editUserRequest) {
@@ -307,6 +403,11 @@ public class SecurityController {
         return ResponseEntity.notFound().build();
     }
 
+    /**
+     * API to get all roles
+     * Available at GET [protocol]://my.host.name/admin/roles
+     * @return HTTP resonse containing the full list of available roles
+     */
     @GetMapping("/admin/roles")
     public ResponseEntity<?> getRoles() {
         List<Role> roles = roleRepository.findAll();

@@ -5,14 +5,32 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.4</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<version>3.2.5</version>
+		<relativePath/>
 	</parent>
 	<groupId>com.cyphersys</groupId>
 	<artifactId>simple-spring-security</artifactId>
 	<version>1.0.0</version>
-	<name>simple-spring-security</name>
-	<description>Completely Opinionated Spring Security Setup for Responsive Apps</description>
+	<name>${project.groupId}:${project.artifactId}</name>
+	<description>Completely Opinionated Spring Security Setup for Responsive and Mobile Apps</description>
+	<url>https://github.com/rhysfred/simple-spring-security</url>
+	<licenses>
+    	<license>
+      		<name>Apache License, Version 2.0</name>
+      		<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      		<distribution>repo</distribution>
+    	</license>
+  	</licenses>
+	 <developers>
+    	<developer>
+      	<name>Rhys Frederick</name>
+      	<email>rhys@frontleftspeaker.com</email>
+      	<organization>Front Left Speaker</organization>
+    </developer>
+  </developers>
+	<scm>
+    	<url>https://github.com/rhysfred/simple-spring-security</url>
+  	</scm>
 	<packaging>jar</packaging>
 	<properties>
 		<java.version>21</java.version>
