@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import com.cyphersys.security.jwt.AuthEntryPointJwt;
 import com.cyphersys.security.jwt.AuthTokenFilter;
+import com.cyphersys.security.repository.UserRepository;
 
 import io.jsonwebtoken.lang.Arrays;
 
@@ -31,8 +32,13 @@ public class WebSecurityConfig {
 
     private static final Logger logger = LoggerFactory.getLogger(WebSecurityConfig.class);
 
+    
     @Autowired
     SimpleUserDetailsService userDetailsService;
+    
+
+    @Autowired
+    UserRepository userRepository;
 
     @Autowired
     private AuthEntryPointJwt unauthorizedHandler;
@@ -46,18 +52,11 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    DaoAuthenticationProvider authenticationProvider() {
+    AuthenticationManager authenticationManager() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-
         authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
-
-        return authProvider;
-    }
-
-    @Bean
-    AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
+        return new ProviderManager(authProvider);
     }
 
     @Bean
@@ -92,12 +91,8 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/security/admin/**").hasAuthority("secadmin")
                         .anyRequest().authenticated());
-        http.authenticationProvider(authenticationProvider());
+        // http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }
-
-//.requestMatchers("/api/security/public/**", "/", "/index.html", "/static/**", "/favicon.ico",
-//"/manifest.json", "/logo*.png", "/error")
-//.permitAll()

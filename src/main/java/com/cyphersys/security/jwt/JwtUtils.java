@@ -20,12 +20,12 @@ import io.jsonwebtoken.security.Keys;
 public class JwtUtils {
     private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    @Value("${taxman.security.jwtSecret:}")
+    @Value("${taxman.security.jwtsecret:}")
     private String jwtSecret;
 
     private SecretKey key;
 
-    @Value("${taxman.security.jwtSecondsToLive:600}")
+    @Value("${taxman.security.jwtsecondstolive:600}")
     private int jwtSecondsToLive;
 
     public String generateJwtToken(Authentication authentication) {
