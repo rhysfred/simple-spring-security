@@ -39,5 +39,15 @@ public class Role {
         this.name = name;
     }
 
-    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o.getClass() == this.getClass()) {
+            Role otherRole = (Role) o;
+            if (this.getName() == otherRole.getName()) {
+                return true;
+            }
+        }
+        return false;
+    }  
 }

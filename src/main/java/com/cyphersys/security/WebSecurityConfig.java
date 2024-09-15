@@ -91,7 +91,6 @@ public class WebSecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/security/admin/**").hasAuthority("secadmin")
                         .anyRequest().authenticated());
-        // http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
