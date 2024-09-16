@@ -17,6 +17,8 @@ public class SimpleUserDetails implements UserDetails {
 
     private Long id;
 
+    private String externalId;
+
     private String username;
 
     @JsonIgnore
@@ -24,9 +26,10 @@ public class SimpleUserDetails implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public SimpleUserDetails(Long id, String username, String password,
+    public SimpleUserDetails(Long id, String externalId, String username, String password,
             Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
+        this.externalId = externalId;
         this.username = username;
         this.password = password;
         this.authorities = authorities;
@@ -38,6 +41,7 @@ public class SimpleUserDetails implements UserDetails {
 
     return new SimpleUserDetails(
         user.getId(), 
+        user.getExternalId(),
         user.getUsername(), 
         user.getPassword(), 
         authorities);
@@ -49,6 +53,10 @@ public class SimpleUserDetails implements UserDetails {
 
   public Long getId() {
     return id;
+  }
+
+  public String getExternalId() {
+    return externalId;
   }
 
   @Override

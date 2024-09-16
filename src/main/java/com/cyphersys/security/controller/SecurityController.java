@@ -207,7 +207,7 @@ public class SecurityController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
+                userDetails.getExternalId(),
                 userDetails.getUsername(),
                 roles));
     }
@@ -228,7 +228,7 @@ public class SecurityController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(new JwtResponse(jwt,
-                userDetails.getId(),
+                userDetails.getExternalId(),
                 userDetails.getUsername(),
                 roles));
     }
@@ -327,7 +327,7 @@ public class SecurityController {
         }
         userRepository.save(user);
         logger.info("New user created: " + createUserRequest.getUsername());
-        return ResponseEntity.ok(user.getUserResponse());
+        return ResponseEntity.ok(user.toUserResponse());
     }
 
     /**
@@ -340,7 +340,7 @@ public class SecurityController {
         List<User> users = userRepository.findAll();
         List<UserResponse> userResults = new ArrayList<UserResponse>();
         for (User dbuser : users) {
-            UserResponse user = dbuser.getUserResponse();
+            UserResponse user = dbuser.toUserResponse();
             userResults.add(user);
         }
         return ResponseEntity
@@ -353,16 +353,18 @@ public class SecurityController {
      * @param username The username to delete
      * @return HTTP response
      */
-    @DeleteMapping("/admin/user/{username}")
+    @DeleteMapping("/admin/user/{userid}")
     @Transactional
-    public ResponseEntity<?> deleteUser(@PathVariable String username) {
-        if (userRepository.existsByUsername(username)) {
-            userRepository.deleteByUsername(username);
+    public ResponseEntity<?> deleteUser(@PathVariable String userid) {
+        Optional<User> oUser = userRepository.findByExternalId(userid);
+        if (oUser.isPresent()) {
+            String username = oUser.get().getUsername();
+            userRepository.deleteByExternalId(userid);
             logger.info("User successfully deleted: " + username);
             return ResponseEntity
                     .ok("{}");
         }
-        logger.error("Request to delete user that does not exist: " + username);
+        logger.error("Request to delete user that does not exist with key: " + userid);
         return ResponseEntity.notFound().build();
     }
 
@@ -373,10 +375,10 @@ public class SecurityController {
      * @param editUserRequest An user request
      * @return HTTP response
      */
-    @PutMapping("/admin/user/{username}")
-    public ResponseEntity<?> updateUser(@PathVariable String username,
+    @PutMapping("/admin/user/{userid}")
+    public ResponseEntity<?> updateUser(@PathVariable String userid,
             @Valid @RequestBody UserRequest editUserRequest) {
-        Optional<User> oUser = userRepository.findByUsername(username);
+        Optional<User> oUser = userRepository.findByExternalId(userid);
         if (oUser.isPresent()) {
             User updatedUser = oUser.get();
             List<Role> roles = new ArrayList<Role>();
@@ -385,7 +387,7 @@ public class SecurityController {
                 if (oRole.isPresent()) {
                     roles.add(oRole.get());
                 } else {
-                    logger.error("Invalid role received when creating user: " + username + ", role: " + role);
+                    logger.error("Invalid role received when creating user: " + updatedUser.getUsername() + ", role: " + role);
                     return ResponseEntity.badRequest().body("{reason: 'Invalid role specified'}");
                 }
             }
@@ -395,11 +397,11 @@ public class SecurityController {
                 updatedUser.setPassword(encoder.encode(editUserRequest.getPassword()));
             }
             userRepository.save(updatedUser);
-            logger.info("User successfully updated: " + username);
+            logger.info("User successfully updated: " + updatedUser.getUsername());
             return ResponseEntity
-                    .ok(updatedUser.getUserResponse());
+                    .ok(updatedUser.toUserResponse());
         }
-        logger.error("Request to update user that does not exist: " + username);
+        logger.error("Request to update user that does not exist using key: " + userid);
         return ResponseEntity.notFound().build();
     }
 

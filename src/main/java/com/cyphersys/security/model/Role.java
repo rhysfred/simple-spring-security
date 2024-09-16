@@ -1,5 +1,6 @@
 package com.cyphersys.security.model;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -44,7 +45,7 @@ public class Role {
         if (this == o) return true;
         if (o.getClass() == this.getClass()) {
             Role otherRole = (Role) o;
-            if (this.getName() == otherRole.getName()) {
+            if (this.getName().equals(otherRole.getName())) {
                 return true;
             }
         }

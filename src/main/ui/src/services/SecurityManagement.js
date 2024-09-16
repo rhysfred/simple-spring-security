@@ -78,8 +78,8 @@ class SecurityManagement {
       });
   }
 
-  async deleteUser(username) {
-    return fetch(this.#userUrl + "/" + username, {
+  async deleteUser(user) {
+    return fetch(this.#userUrl + "/" + user.id, {
       method: "DELETE",
       headers: this.#getRequestHeaders(),
     })
@@ -92,7 +92,7 @@ class SecurityManagement {
   }
 
   async modifyUser(user) {
-    return fetch(this.#userUrl + "/" + user.username, {
+    return fetch(this.#userUrl + "/" + user.id, {
       method: "PUT",
       headers: this.#getRequestHeaders(),
       body: JSON.stringify(user),

@@ -36,15 +36,15 @@ class Authentication {
           throw error;
         }
       })
-      .then((data) => {
-        if (data.accessToken) {
+      .then((user) => {
+        if (user.accessToken) {
+          localStorage.setItem(key, JSON.stringify(user));
           if (this.#userChangeHandler) {
-            this.#userChangeHandler(JSON.stringify(data));
+            this.#userChangeHandler(JSON.stringify(user));
           }
-          localStorage.setItem(key, JSON.stringify(data));
-          window.dispatchEvent(new StorageEvent("local-storage", { key }));
+          window.dispatchEvent(new StorageEvent("local-storage", { key: key, newValue: user }));
         }
-        return data;
+        return user;
       });
   }
   async changePassword(password, newPassword) {
@@ -103,11 +103,12 @@ class Authentication {
           throw error;
         }
       })
-      .then((data) => {
-        if (data.accessToken) {
-          localStorage.setItem(key, JSON.stringify(data));
+      .then((user) => {
+        if (user.accessToken) {
+          localStorage.setItem(key, JSON.stringify(user));
+
         }
-        return data;
+        return user;
       });
   }
 
@@ -116,11 +117,13 @@ class Authentication {
     if (this.#userChangeHandler) {
       this.#userChangeHandler(null);
     }
-    window.dispatchEvent(new StorageEvent("local-storage", { key }));
+    window.dispatchEvent(new StorageEvent("local-storage", { key: key, newValue: user }));
   }
 
   getCurrentUser() {
-    return JSON.parse(localStorage.getItem(key));
+    const user = localStorage.getItem(key);
+    if (!user) return null;
+    return JSON.parse(user);
   }
 
   subscribeUserChanges(callback) {
@@ -128,7 +131,9 @@ class Authentication {
       throw new Error("Invalid callback function");
     }
     this.#userChangeHandler = callback;
-    return JSON.parse(localStorage.getItem(key));
+    const user = localStorage.getItem(key);
+    if (!user) return null;
+    return JSON.parse(user);
   }
 
   getLocalStorageKey() {

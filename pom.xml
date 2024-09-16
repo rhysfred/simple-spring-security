@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.cyphersys</groupId>
 	<artifactId>simple-spring-security</artifactId>
-	<version>1.0.2</version>
+	<version>1.0.4</version>
 	<name>${project.groupId}:${project.artifactId}</name>
 	<description>Completely Opinionated Spring Security Setup for Responsive and Mobile Apps</description>
 	<url>https://github.com/rhysfred/simple-spring-security</url>

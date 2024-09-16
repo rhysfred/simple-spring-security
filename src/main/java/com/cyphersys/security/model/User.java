@@ -2,6 +2,7 @@ package com.cyphersys.security.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +11,7 @@ import com.cyphersys.security.wire.response.UserResponse;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
@@ -30,7 +32,13 @@ public class User {
 
     @NotBlank
     @JsonProperty(required = true)
+    @Column(nullable = false, unique = true)
     private String username;
+
+    @NotBlank
+    @JsonProperty(required = true)
+    @Column(nullable = false, unique = true)
+    private String externalId;
 
     @JsonIgnore
     @NotBlank
@@ -39,14 +47,14 @@ public class User {
     @ManyToMany
     private List<Role> roles;
 
-    public User() {
-        this.roles = new ArrayList<Role>();
-    }
+    @SuppressWarnings("unused")
+    private User() {}
 
     public User(String username, String password) {
         this.username = username;
         this.hashedPassword = password;
         this.roles = new ArrayList<Role>();
+        this.externalId = UUID.randomUUID().toString();
 
     }
 
@@ -64,6 +72,10 @@ public class User {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public String getExternalId() {
+        return this.externalId;
     }
 
     public String getPassword() {
@@ -89,9 +101,16 @@ public class User {
             logger.error("Attempt to remove role that user does not have. No action taken");
         }
     }
+
+    public Boolean hasRole(Role role) {
+        logger.debug("hasRole called");
+        logger.debug("Returning {} for hasRole", roles.contains(role));
+        return roles.contains(role);
+    }
+
     
-    public UserResponse getUserResponse() {
-        return new UserResponse(this.username, this.roles);
+    public UserResponse toUserResponse() {
+        return new UserResponse(this.username, this.externalId, this.roles);
     }
 
 }
